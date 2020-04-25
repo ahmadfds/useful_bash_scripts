@@ -107,8 +107,8 @@ while read -r line; do
 
 		if [ $HTTPS_REDIRECT -eq 1 ]; then
 			REDIRECTS+=("  redirect scheme https code 301 if !{ ssl_fc } { hdr_end(host) -i ${DOMAIN_NAME} }")
-		#else
-			#REDIRECTS+=("  redirect scheme http code 301 if { ssl_fc } { hdr_end(host) -i ${DOMAIN_NAME} }")
+		else
+			REDIRECTS+=("  redirect scheme http code 301 if { ssl_fc } { hdr_end(host) -i ${DOMAIN_NAME} }")
 		fi
 
 
