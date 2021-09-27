@@ -10,3 +10,4 @@ curl "${ESERVER}/_aliases?pretty=true"
 
 # This will give you following self explanatory output in a tabular manner
 curl "${ESERVER}/_cat/indices?v"
+
