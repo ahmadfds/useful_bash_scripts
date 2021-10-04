@@ -29,17 +29,17 @@ rollbackAction() {
 }
 
 deleteSnapshotIfExists() {
-  EXISTS=$(lvs | grep -o "$LVM_SNAPSHOT_NAME")
+  EXISTS=$(/sbin/lvs | grep -o "$LVM_SNAPSHOT_NAME")
   if [ ! -z $EXISTS ]; then
     echo "Deleting an old snapshot ..."
     umount /dev/${LVM_GROUP_NAME}/${LVM_SNAPSHOT_NAME}
-    lvremove -y /dev/${LVM_GROUP_NAME}/${LVM_SNAPSHOT_NAME}
+    /sbin/lvremove -y /dev/${LVM_GROUP_NAME}/${LVM_SNAPSHOT_NAME}
   fi
 }
 
 createSnapshot() {
   echo "Createing a new snapshot ..."
-  lvcreate -L ${LVM_SNAPSHOT_COW_SIZE}G -s -n $LVM_SNAPSHOT_NAME /dev/${LVM_GROUP_NAME}/${LVM_DATA_NAME}
+  /sbin/lvcreate -L ${LVM_SNAPSHOT_COW_SIZE}G -s -n $LVM_SNAPSHOT_NAME /dev/${LVM_GROUP_NAME}/${LVM_DATA_NAME}
   mount /dev/${LVM_GROUP_NAME}/$LVM_SNAPSHOT_NAME $SNAPSHOT_MOUNT_DIR
 }
 
@@ -51,7 +51,7 @@ backupFiles() {
 
 archiveToS3() {
   echo "Archiving to S3 ..."
-  /usr/local/bin/aws s3 cp "${BACKUP_DIR}/${BACKUP_FILE_PREFIX}-${CURRDATE}.tar" ${S3_ARCHIVE_PATH} --storage-class ONE-ZONE_IA
+  /usr/local/bin/aws s3 cp "${BACKUP_DIR}/${BACKUP_FILE_PREFIX}-${CURRDATE}.tar" ${S3_ARCHIVE_PATH} --storage-class ONEZONE_IA
 }
 
 cleanBackupDirectory() {
