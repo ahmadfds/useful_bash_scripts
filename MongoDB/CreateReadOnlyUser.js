@@ -1,4 +1,4 @@
-use admin
+// > use admin
 db.createUser(
   {
     user: "readonlyuser",

@@ -1,0 +1,2 @@
+# to disable mysql auth, mysql -uroot [NO PASSWORD], and the following line to my.cnf then restart mysql
+skip-grant-tables = 1
