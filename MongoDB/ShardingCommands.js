@@ -30,3 +30,17 @@ sh.enableSharding('dbname') // enable db sharding
 sh.shardCollection("dbname.collection", {hashKey: "hashed"}, { chunkSize: 16 }) // enable collection sharding
 sh.getShardedDataDistribution()
 db.collection.drop({sharded:true})
+
+
+
+// You can force a replica set member to become primary by giving it a higher members[n].priority value
+// than any other member in the set.
+// Optionally, you also can force a member never to become primary by setting its members[n].priority
+// value to 0, which means the member can never seek election as primary. For more information, see
+// Priority 0 Replica Set Members.
+cfg = rs.conf()
+cfg.members[0].priority = 1
+cfg.members[1].priority = 0.5
+cfg.members[2].priority = 0.1
+rs.reconfig(cfg)
+
