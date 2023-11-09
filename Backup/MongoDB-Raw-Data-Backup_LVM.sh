@@ -2,15 +2,12 @@
 
 MONGO_STOP_COMMAND=
 MONGO_START_COMMAND=
+S3_ARCHIVE_PATH=
 SNAPSHOT_MOUNT_DIR=/var/lib/mongodb-snapshot
-BACKUP_DIR=/var/lib/mongodb-backup
 LVM_DATA_NAME="mongo-data"
 LVM_GROUP_NAME="vg00"
-LVM_SNAPSHOT_COW_SIZE=20
+LVM_SNAPSHOT_COW_SIZE=100
 LVM_SNAPSHOT_NAME="tmp-backup-snapshot"
-BACKUP_FILE_PREFIX="mongodb-backup"
-S3_ARCHIVE_PATH=
-CURRDATE=$(date +%Y-%m-%d-%H-%M-%S)
 
 startMongo() {
   echo "Starting MongoDB ..."
@@ -43,28 +40,16 @@ createSnapshot() {
   mount /dev/${LVM_GROUP_NAME}/$LVM_SNAPSHOT_NAME $SNAPSHOT_MOUNT_DIR
 }
 
-backupFiles() {
-  echo "Archiving data directory to ${BACKUP_FILE_PREFIX}-${CURRDATE}.tar"
-  cd $BACKUP_DIR
-  tar -cf "${BACKUP_FILE_PREFIX}-${CURRDATE}.tar" -C $SNAPSHOT_MOUNT_DIR .
-}
-
 archiveToS3() {
   echo "Archiving to S3 ..."
-  /usr/local/bin/aws s3 cp "${BACKUP_DIR}/${BACKUP_FILE_PREFIX}-${CURRDATE}.tar" ${S3_ARCHIVE_PATH} --storage-class ONEZONE_IA
+  CURRDATE=$(date +%Y-%m-%d-%H-%M-%S)
+  /usr/local/bin/aws s3 sync "${SNAPSHOT_MOUNT_DIR}/*" ${S3_ARCHIVE_PATH}/${CURRDATE}/ --storage-class ONEZONE_IA
 }
 
-cleanBackupDirectory() {
-  cd $BACKUP_DIR
-  rm -f ${BACKUP_FILE_PREFIX}*.tar
-}
 
-cleanBackupDirectory || exit 2
 deleteSnapshotIfExists || exit 2
 stopMongo
 createSnapshot || rollbackAction
 startMongo
-backupFiles
-deleteSnapshotIfExists
 archiveToS3
-cleanBackupDirectory
+deleteSnapshotIfExists
