@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 MONGO_STOP_COMMAND=
 MONGO_START_COMMAND=
@@ -36,6 +36,7 @@ deleteSnapshotIfExists() {
 
 createSnapshot() {
   echo "Createing a new snapshot ..."
+  mkdir -p $LVM_SNAPSHOT_NAME
   /sbin/lvcreate -L ${LVM_SNAPSHOT_COW_SIZE}G -s -n $LVM_SNAPSHOT_NAME /dev/${LVM_GROUP_NAME}/${LVM_DATA_NAME}
   mount /dev/${LVM_GROUP_NAME}/$LVM_SNAPSHOT_NAME $SNAPSHOT_MOUNT_DIR
 }
@@ -43,9 +44,8 @@ createSnapshot() {
 archiveToS3() {
   echo "Archiving to S3 ..."
   CURRDATE=$(date +%Y-%m-%d-%H-%M-%S)
-  /usr/local/bin/aws s3 sync "${SNAPSHOT_MOUNT_DIR}/*" ${S3_ARCHIVE_PATH}/${CURRDATE}/ --storage-class ONEZONE_IA
+  /usr/local/bin/aws s3 sync "${SNAPSHOT_MOUNT_DIR}/" ${S3_ARCHIVE_PATH}/${CURRDATE}/ --storage-class ONEZONE_IA
 }
-
 
 deleteSnapshotIfExists || exit 2
 stopMongo
